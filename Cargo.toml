@@ -1,0 +1,7 @@
+[package]
+name = "rubiks-solver"
+version = "0.1.0"
+authors = ["Daniel Kolsoi <thadan64@gmail.com>"]
+
+[dependencies]
+slotmap = "0.2.0"
