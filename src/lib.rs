@@ -47,6 +47,9 @@ impl Face {
     }
 }
 
+const CORNERS: [usize; 4] = [Face::TOP_LEFT, Face::TOP_RIGHT, Face::BOTTOM_LEFT, Face::BOTTOM_RIGHT];
+const EDGES: [usize; 4] = [Face::LEFT, Face::TOP, Face::RIGHT, Face::BOTTOM];
+
 // 0 is front, 1 is left, 2 is back, 3 is right, 4 is top, 5 is bottom
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Cube3x3x3 {
@@ -66,32 +69,66 @@ impl Cube3x3x3 {
             faces,
         };
 
-        if !cube.has_valid_faces() {
+        if !cube.is_valid() {
             return Err("Invalid start state");
         }
 
         Ok(cube)
     }
 
-    fn has_valid_faces(&self) -> bool {
-        let mut color_count = [0u8; 6];
+    fn is_valid(&self) -> bool {
+        let mut center_counts = [0u8; 6];
+        let mut edges_counts = [0u8; 6];
+        let mut corner_counts = [0u8; 6];
 
         for face in self.faces.iter() {
-            for color in face.colors.iter() {
-                match color {
-                    Color::Blue => color_count[Self::BLUE] += 1,
-                    Color::Green => color_count[Self::GREEN] += 1,
-                    Color::Orange => color_count[Self::ORANGE] += 1,
-                    Color::Red => color_count[Self::RED] += 1,
-                    Color::White => color_count[Self::WHITE] += 1,
-                    Color::Yellow => color_count[Self::YELLOW] += 1,
+            match face.colors[Face::CENTER] {
+                Color::Blue => center_counts[Self::BLUE] += 1,
+                Color::Green => center_counts[Self::GREEN] += 1,
+                Color::Orange => center_counts[Self::ORANGE] += 1,
+                Color::Red => center_counts[Self::RED] += 1,
+                Color::White => center_counts[Self::WHITE] += 1,
+                Color::Yellow => center_counts[Self::YELLOW] += 1,
+            }
+
+            for edge in EDGES.iter() {
+                match face.colors[*edge] {
+                    Color::Blue => edges_counts[Self::BLUE] += 1,
+                    Color::Green => edges_counts[Self::GREEN] += 1,
+                    Color::Orange => edges_counts[Self::ORANGE] += 1,
+                    Color::Red => edges_counts[Self::RED] += 1,
+                    Color::White => edges_counts[Self::WHITE] += 1,
+                    Color::Yellow => edges_counts[Self::YELLOW] += 1,
                 }
             }
 
-            for count in color_count.iter() {
-                if *count > 9 {
-                    return false;
+            for corner in CORNERS.iter() {
+                match face.colors[*corner] {
+                    Color::Blue => corner_counts[Self::BLUE] += 1,
+                    Color::Green => corner_counts[Self::GREEN] += 1,
+                    Color::Orange => corner_counts[Self::ORANGE] += 1,
+                    Color::Red => corner_counts[Self::RED] += 1,
+                    Color::White => corner_counts[Self::WHITE] += 1,
+                    Color::Yellow => corner_counts[Self::YELLOW] += 1,
                 }
+            }
+        }
+
+        for center_count in center_counts.iter() {
+            if *center_count != 1 {
+                return false;
+            }
+        }
+
+        for edge_count in edges_counts.iter() {
+            if *edge_count != 4 {
+                return false;
+            }
+        }
+
+        for corner_count in corner_counts.iter() {
+            if *corner_count != 4 {
+                return false;
             }
         }
 
